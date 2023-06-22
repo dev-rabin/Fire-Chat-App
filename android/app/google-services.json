@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1021863050061",
+    "project_id": "fire-chatapp-16d6c",
+    "storage_bucket": "fire-chatapp-16d6c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021863050061:android:e54e8748d33f11df2a5504",
+        "android_client_info": {
+          "package_name": "com.example.fire_chatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021863050061-dc8rg76cn4720au9dl9ji12357bdpnji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgOvG6PqagF7glYWXNbY3dJ8Imc9n-xAM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021863050061-dc8rg76cn4720au9dl9ji12357bdpnji.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
