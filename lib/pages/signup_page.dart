@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fire_chatapp/modals/user_model.dart';
+import 'package:fire_chatapp/pages/comp_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -48,16 +49,22 @@ class _SignUpPageState extends State<SignUpPage> {
       UserModel newUser = UserModel(
         uid: uid,
         email: email,
-        // fullname: "",
-        // profilepic: "",
+        fullname: "",
+        profilepic: "",
       );
       await FirebaseFirestore.instance
           .collection("users")
           .doc(uid)
           .set(newUser.toMap())
-          .then((value) {
-        print('New User Created!');
-      });
+          .then(
+            (value) => Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => CompleteProfile(
+                    userModel: newUser, firebaseUser: credential!.user!),
+              ),
+            ),
+          );
     }
   }
 
@@ -119,7 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Don't Have An Account?"),
+                Text("Already Have An Account?"),
                 CupertinoButton(
                   onPressed: (() {
                     Navigator.pop(context);

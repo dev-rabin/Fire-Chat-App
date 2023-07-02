@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fire_chatapp/modals/user_model.dart';
+import 'package:fire_chatapp/pages/home_page.dart';
 import 'package:fire_chatapp/pages/signup_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -47,7 +48,14 @@ class _LoginPageState extends State<LoginPage> {
       UserModel userModel =
           UserModel.fromMap(userData.data() as Map<String, dynamic>);
 
-      print("Login Successful!");
+      // ignore: use_build_context_synchronously
+      Navigator.push(
+        context,
+        CupertinoPageRoute(builder: (context) {
+          return HomePage(
+              userModel: userModel, firebaseUser: userCredential!.user!);
+        }),
+      );
     }
   }
 
