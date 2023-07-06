@@ -1,122 +1,169 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fire_chatapp/pages/chatroom_page.dart';
+import 'package:fire_chatapp/modals/chatroom_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../main.dart';
+import '../modals/user_model.dart';
+import 'chatroom_page.dart';
+
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final UserModel userModel;
+  final User firebaseUser;
+
+  const SearchPage(
+      {Key? key, required this.userModel, required this.firebaseUser})
+      : super(key: key);
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  _SearchPageState createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  String? searchByName = "";
+  TextEditingController searchController = TextEditingController();
+
+  Future<ChatroomModel?> getChatroomModel(UserModel targetUser) async {
+    ChatroomModel? chatRoom;
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("chatrooms")
+        .where("participants.${widget.userModel.uid}", isEqualTo: true)
+        .where("participants.${targetUser.uid}", isEqualTo: true)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      // Fetch the existing one
+      var docData = snapshot.docs[0].data();
+      ChatroomModel existingChatroom =
+          ChatroomModel.fromMap(docData as Map<String, dynamic>);
+
+      chatRoom = existingChatroom;
+
+      log("Fetch Existing Chatroom");
+    } else {
+      // Create a new one
+      ChatroomModel newChatroom = ChatroomModel(
+        chatroomId: uuid.v1(),
+        lastMessage: "",
+        participants: {
+          widget.userModel.uid.toString(): true,
+          targetUser.uid.toString(): true,
+        },
+      );
+
+      await FirebaseFirestore.instance
+          .collection("chatrooms")
+          .doc(newChatroom.chatroomId)
+          .set(newChatroom.toMap());
+
+      chatRoom = newChatroom;
+
+      log("New Chatroom Created!");
+    }
+
+    return chatRoom;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: "Search",
-            focusColor: Colors.white,
-          ),
-          onChanged: (val) {
-            setState(() {
-              searchByName = val;
-            });
-          },
-        ),
+        title: Text("Search"),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection("users").snapshots(),
-        builder: (context, snapshots) {
-          return (snapshots.connectionState == ConnectionState.waiting)
-              ? Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: snapshots.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    var data = snapshots.data!.docs[index].data()
-                        as Map<String, dynamic>;
+      body: SafeArea(
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 10,
+          ),
+          child: Column(
+            children: [
+              TextField(
+                controller: searchController,
+                decoration: InputDecoration(labelText: "Email Address"),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              CupertinoButton(
+                onPressed: () {
+                  setState(() {});
+                },
+                color: Theme.of(context).colorScheme.secondary,
+                child: Text("Search"),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection("users")
+                      .where("email", isEqualTo: searchController.text)
+                      .where("email", isNotEqualTo: widget.userModel.email)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.active) {
+                      if (snapshot.hasData) {
+                        QuerySnapshot dataSnapshot =
+                            snapshot.data as QuerySnapshot;
 
-                    if (searchByName!.isEmpty) {
-                      return ListTile(
-                        textColor: Color.fromARGB(255, 156, 156, 156),
-                        title: Text(data['fullname']),
-                        leading: CircleAvatar(
-                          backgroundColor: Color.fromARGB(255, 159, 159, 159),
-                          backgroundImage: NetworkImage(data['profilepic']),
-                        ),
-                      );
+                        if (dataSnapshot.docs.isNotEmpty) {
+                          Map<String, dynamic> userMap = dataSnapshot.docs[0]
+                              .data() as Map<String, dynamic>;
+
+                          UserModel searchedUser = UserModel.fromMap(userMap);
+
+                          return ListTile(
+                            onTap: () async {
+                              ChatroomModel? chatroomModel =
+                                  await getChatroomModel(searchedUser);
+
+                              if (chatroomModel != null) {
+                          
+                                Navigator.pop(context);
+                                // ignore: use_build_context_synchronously
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(builder: (context) {
+                                    return ChatRoomPage(
+                                        targetUser: searchedUser,
+                                        chatRoom: chatroomModel,
+                                        userModel: widget.userModel,
+                                        firebaseUser: widget.firebaseUser);
+                                  }),
+                                );
+                              }
+                            },
+                            leading: CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(searchedUser.profilepic!),
+                              backgroundColor: Colors.grey[500],
+                            ),
+                            title: Text(searchedUser.fullname!),
+                            subtitle: Text(searchedUser.email!),
+                            trailing: Icon(Icons.keyboard_arrow_right),
+                          );
+                        } else {
+                          return Text("No results found!");
+                        }
+                      } else if (snapshot.hasError) {
+                        return Text("An error occured!");
+                      } else {
+                        return Text("No results found!");
+                      }
+                    } else {
+                      return CircularProgressIndicator();
                     }
-                    if (data['fullname']
-                        .toString()
-                        .toLowerCase()
-                        .startsWith(searchByName!.toLowerCase())) {
-                      return ListTile(
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(context,
-                              CupertinoPageRoute(builder: (context) {
-                            return ChatRoomPage();
-                          }));
-                        },
-                        title: Text(data['fullname']),
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(data['profilepic']),
-                        ),
-                        subtitle: Text(data["email"]),
-                        trailing: Icon(Icons.arrow_forward),
-                      );
-                    }
-                    return Container();
-                  },
-                );
-        },
+                  }),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
-
-
-
-
-
-
-// class SearchPage extends StatefulWidget {
-//   // final UserModel? userModel;
-//   // final User? firebaseUser;
-
-//   // const SearchPage(
-//   //     {super.key,  this.userModel,  this.firebaseUser});
-
-//   @override
-//   State<SearchPage> createState() => _SearchPageState();
-// }
-
-// class _SearchPageState extends State<SearchPage> {
-//   TextEditingController searchController = TextEditingController();
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: AppBar(
-//           title: TextField(
-//             textInputAction: TextInputAction.search,
-//             onSubmitted: (value) {
-//               print("Search");
-//             },
-//             controller: searchController,
-//             decoration: InputDecoration(
-//               hintText: "Search",
-//               focusColor: Colors.white,
-//             ),
-//             style: TextStyle(color: Colors.white),
-//           ),
-//         ),
-//         body: Container(
-//           child: Text('Search Chat'),
-//         ));
-//   }
-// }
