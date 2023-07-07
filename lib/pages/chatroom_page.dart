@@ -55,7 +55,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           .collection("chatrooms")
           .doc(widget.chatRoom.chatroomId)
           .set(widget.chatRoom.toMap());
-
+          
+      log(widget.chatRoom.lastMessage.toString());
       log("message sent!");
     } else {
       log("Message is empty");
