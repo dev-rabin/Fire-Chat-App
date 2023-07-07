@@ -56,15 +56,16 @@ class _SignUpPageState extends State<SignUpPage> {
           .collection("users")
           .doc(uid)
           .set(newUser.toMap())
-          .then(
-            (value) => Navigator.push(
-              context,
-              CupertinoPageRoute(
-                builder: (context) => CompleteProfile(
-                    userModel: newUser, firebaseUser: credential!.user!),
-              ),
-            ),
-          );
+          .then((value) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => CompleteProfile(
+                userModel: newUser, firebaseUser: credential!.user!),
+          ),
+        );
+      });
     }
   }
 

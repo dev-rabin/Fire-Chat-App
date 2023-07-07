@@ -130,12 +130,16 @@ class _CompleteProfileState extends State<CompleteProfile> {
         .set(widget.userModel.toMap())
         .then((value) {
       log("data uploaded");
-      Navigator.push(context, CupertinoPageRoute(
-        builder: (context) {
-          return HomePage(
-              userModel: widget.userModel, firebaseUser: widget.firebaseUser);
-        },
-      ),);
+      Navigator.popUntil(context, (route) => route.isFirst);
+      Navigator.pushReplacement(
+        context,
+        CupertinoPageRoute(
+          builder: (context) {
+            return HomePage(
+                userModel: widget.userModel, firebaseUser: widget.firebaseUser);
+          },
+        ),
+      );
     });
   }
 

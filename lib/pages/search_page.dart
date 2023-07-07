@@ -54,6 +54,7 @@ class _SearchPageState extends State<SearchPage> {
           widget.userModel.uid.toString(): true,
           targetUser.uid.toString(): true,
         },
+        sendTime: DateTime.now(),
       );
 
       await FirebaseFirestore.instance
@@ -124,7 +125,6 @@ class _SearchPageState extends State<SearchPage> {
                                   await getChatroomModel(searchedUser);
 
                               if (chatroomModel != null) {
-                          
                                 Navigator.pop(context);
                                 // ignore: use_build_context_synchronously
                                 Navigator.push(

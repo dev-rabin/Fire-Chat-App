@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text("Don't Have An Account?"),
                 CupertinoButton(
                   onPressed: (() {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         CupertinoPageRoute(
                             builder: ((context) => SignUpPage())));

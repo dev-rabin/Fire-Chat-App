@@ -28,19 +28,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            FirebaseAuth.instance.signOut().then((value) {
-              Navigator.push(context, CupertinoPageRoute(builder: (context) {
-                return LoginPage();
-              }));
-            });
-          },
-          icon: Icon(Icons.logout),
-        ),
         title: Text("Fire Chat"),
         automaticallyImplyLeading: false,
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.pushReplacement(context,
+                  CupertinoPageRoute(builder: (context) {
+                return LoginPage();
+              }));
+            },
+            icon: Icon(Icons.exit_to_app),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Container(
@@ -50,6 +53,8 @@ class _HomePageState extends State<HomePage> {
                   .collection("chatrooms")
                   .where("participants.${widget.userModel.uid}",
                       isEqualTo: true)
+
+                  // .orderBy("sendtime", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.active) {
@@ -99,9 +104,20 @@ class _HomePageState extends State<HomePage> {
                                         targetUser.profilepic.toString()),
                                   ),
                                   title: Text(targetUser.fullname.toString()),
-                                  subtitle: Text(
-                                    // Gives Null Value! lets see
-                                      chatroomModel.lastMessage.toString()),
+                                  subtitle: (chatroomModel.lastMessage
+                                              .toString() !=
+                                          "")
+                                      ? Text(
+                                          chatroomModel.lastMessage.toString())
+                                      : Text(
+                                          "Say hi to your new friend!",
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary),
+                                        ),
+                                  trailing:
+                                      Text(chatroomModel.sendTime.toString()),
                                 );
                               } else {
                                 return Text("Some Value Occurs Null");
