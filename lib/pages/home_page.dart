@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Fire Chat"),
-        automaticallyImplyLeading: false,
         centerTitle: true,
         actions: [
           IconButton(
@@ -51,10 +50,8 @@ class _HomePageState extends State<HomePage> {
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("chatrooms")
-                  .where("participants.${widget.userModel.uid}",
-                      isEqualTo: true)
-
-                  // .orderBy("sendtime", descending: true)
+                  .where("users", arrayContains: widget.userModel.uid)
+                  .orderBy("sendtime", descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.active) {
@@ -116,8 +113,8 @@ class _HomePageState extends State<HomePage> {
                                                   .colorScheme
                                                   .secondary),
                                         ),
-                                  trailing:
-                                      Text(chatroomModel.sendTime.toString()),
+                                  // trailing:
+                                  //     Text(chatroomModel.sendTime.toString()),
                                 );
                               } else {
                                 return Text("Some Value Occurs Null");

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors,
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fire_chatapp/modals/ui_helper.dart';
 import 'package:fire_chatapp/modals/user_model.dart';
 import 'package:fire_chatapp/pages/home_page.dart';
 import 'package:fire_chatapp/pages/signup_page.dart';
@@ -24,7 +25,8 @@ class _LoginPageState extends State<LoginPage> {
     String password = passwordController.text.trim();
 
     if (email == "" || password == "") {
-      print("Please Fill Email & Password");
+      UIHelper.showAlertDialog(
+          context, "Please fill all the fields", "Incomplete data");
     } else {
       login(email, password);
     }
@@ -32,12 +34,19 @@ class _LoginPageState extends State<LoginPage> {
 
   void login(String email, String password) async {
     UserCredential? userCredential;
-
+    UIHelper.showLoadingDialog(context, "Logging In...");
     try {
       userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (e) {
-      print(e.code.toString());
+      // For close loading alert dialog
+      Navigator.pop(context);
+      // show alert dialog
+      UIHelper.showAlertDialog(
+        context,
+        e.message!,
+        "Error",
+      );
     }
 
     if (userCredential != null) {
@@ -114,6 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                 Text("Don't Have An Account?"),
                 CupertinoButton(
                   onPressed: (() {
+                    Navigator.popUntil(context, (route) => route.isFirst);
                     Navigator.pushReplacement(
                         context,
                         CupertinoPageRoute(

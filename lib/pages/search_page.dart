@@ -48,14 +48,14 @@ class _SearchPageState extends State<SearchPage> {
     } else {
       // Create a new one
       ChatroomModel newChatroom = ChatroomModel(
-        chatroomId: uuid.v1(),
-        lastMessage: "",
-        participants: {
-          widget.userModel.uid.toString(): true,
-          targetUser.uid.toString(): true,
-        },
-        sendTime: DateTime.now(),
-      );
+          chatroomId: uuid.v1(),
+          lastMessage: "",
+          participants: {
+            widget.userModel.uid.toString(): true,
+            targetUser.uid.toString(): true,
+          },
+          sendTime: DateTime.now(),
+          users: [widget.userModel.uid, targetUser.uid]);
 
       await FirebaseFirestore.instance
           .collection("chatrooms")

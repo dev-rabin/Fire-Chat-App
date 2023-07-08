@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fire_chatapp/modals/ui_helper.dart';
 import 'package:fire_chatapp/modals/user_model.dart';
 import 'package:fire_chatapp/pages/comp_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,9 +26,13 @@ class _SignUpPageState extends State<SignUpPage> {
     String confirmPassword = confirmPasswordController.text.trim();
 
     if (email == "" || password == "" || confirmPassword == "") {
-      print('Please Fill All The Fields!');
+      UIHelper.showAlertDialog(
+          context, "Please fill all the fields", "Incomplete Data");
     } else if (password != confirmPassword) {
-      print('Passwords Do Not Match');
+      UIHelper.showAlertDialog(
+          context,
+          "Password you entered do not match! Please fill correct password ",
+          "Wrong Password");
     } else {
       signUp(email, password);
     }
@@ -35,12 +40,15 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void signUp(String email, String password) async {
     UserCredential? credential;
+    UIHelper.showLoadingDialog(context, "Creating new account...");
     try {
       credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text);
     } on FirebaseAuthException catch (e) {
-      print(e.code.toString());
+      Navigator.pop(context);
+
+      UIHelper.showAlertDialog(context, "Error", e.message!);
     }
 
     if (credential != null) {

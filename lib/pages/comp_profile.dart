@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fire_chatapp/modals/ui_helper.dart';
 import 'package:fire_chatapp/modals/user_model.dart';
 import 'package:fire_chatapp/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,49 +31,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
   TextEditingController fullNameController = TextEditingController();
   File? imageFile;
 
-  // void selectImage(ImageSource source) async {
-  //   XFile? pickedFile = await ImagePicker().pickImage(source: source);
-
-  //   if (pickedFile != null) {
-  //     cropImage(pickedFile);
-  //   }
-  // }
-
-  // void cropImage(XFile file) async {
-  //   File? croppedImage = await ImageCropper.cropImage(
-  //     sourcePath: file.path,
-  //     aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
-  //     compressQuality: 20,
-  //   );
-
-  //   if (croppedImage != null) {
-  //     setState(() {
-  //       _imageFile = croppedImage;
-  //     });
-  //   } else {
-  //     print(_imageFile);
-  //   }
-  // }
-  // File? _imageFile;
-
-  // Future _selectImage(ImageSource source) async {
-  //   try {
-  //     final image = ImagePicker().pickImage(source: source);
-  //     if (image == null) return;
-  //     File? img = File(image.);
-
-  //     setState(() {
-
-  //       _imageFile =
-  //       Navigator.pop(context);
-  //       print(image);
-  //     });
-  //   } on PlatformException catch (e) {
-  //     print(e);
-  //     Navigator.pop(context);
-  //   }
-  // }
-
   Future pickImage(ImageSource source) async {
     try {
       final image = await ImagePicker().pickImage(source: source);
@@ -89,7 +47,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
     CroppedFile? croppedImage = await ImageCropper().cropImage(
       sourcePath: imageFile.path,
       aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
-      compressQuality: 50,
+      compressQuality: 10,
     );
 
     if (croppedImage == null) {
@@ -103,7 +61,10 @@ class _CompleteProfileState extends State<CompleteProfile> {
     String fullName = fullNameController.text.trim();
 
     if (fullName == "" || imageFile == null) {
-      print("Please fill all details");
+      UIHelper.showAlertDialog(
+          context,
+          "Please fill the details and upload a profile picture",
+          "Incomplete Data");
     } else {
       log("uploading data");
       _uploaData();
@@ -111,6 +72,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
   }
 
   void _uploaData() async {
+    UIHelper.showLoadingDialog(context, "Imgae Uploading...");
     UploadTask uploadTask = FirebaseStorage.instance
         .ref("profilepictures")
         .child(widget.userModel.uid.toString())
