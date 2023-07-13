@@ -1,14 +1,11 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fire_chatapp/main.dart';
 import 'package:fire_chatapp/modals/message_modal.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
-
 import '../modals/chatroom_model.dart';
 import '../modals/user_model.dart';
 
@@ -31,6 +28,8 @@ class ChatRoomPage extends StatefulWidget {
 
 class _ChatRoomPageState extends State<ChatRoomPage> {
   TextEditingController messageController = TextEditingController();
+  Map<String, dynamic>? userMap;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   void sendMessage() async {
     String message = messageController.text.trim();
@@ -43,7 +42,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           text: message,
           oncreated: DateTime.now(),
           seen: false);
-      FirebaseFirestore.instance
+      _firestore
           .collection("chatrooms")
           .doc(widget.chatRoom.chatroomId)
           .collection("messages")
@@ -51,11 +50,11 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           .set(newMessage.toMap());
 
       widget.chatRoom.lastMessage = message;
-      FirebaseFirestore.instance
+      _firestore
           .collection("chatrooms")
           .doc(widget.chatRoom.chatroomId)
           .set(widget.chatRoom.toMap());
-          
+
       log(widget.chatRoom.lastMessage.toString());
       log("message sent!");
     } else {
@@ -68,27 +67,57 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: const Color.fromARGB(255, 206, 206, 206),
-                backgroundImage:
-                    NetworkImage(widget.targetUser.profilepic.toString()),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Text(widget.targetUser.fullname.toString()),
-            ],
-          ),
-        ),
+            title: StreamBuilder<DocumentSnapshot>(
+          stream: _firestore
+              .collection("users")
+              .doc(widget.targetUser.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.data != null) {
+              return Container(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage:
+                          NetworkImage(widget.targetUser.profilepic.toString()),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.targetUser.fullname.toString(),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 20),
+                        ),
+                        SizedBox(
+                          height: 4,
+                        ),
+                        Text(
+                          (snapshot.data?['status'] == "Online")
+                              ? snapshot.data!['status']
+                              : "Last Seen at ${widget.targetUser.lastSeen}",
+                          style: TextStyle(
+                              fontWeight: FontWeight.normal, fontSize: 12),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            } else
+              return Container();
+          },
+        )),
         body: Center(
           child: Column(
             children: [
               Expanded(
                 child: Container(
                   child: StreamBuilder(
-                    stream: FirebaseFirestore.instance
+                    stream: _firestore
                         .collection("chatrooms")
                         .doc(widget.chatRoom.chatroomId)
                         .collection("messages")

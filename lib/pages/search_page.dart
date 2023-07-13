@@ -16,9 +16,10 @@ class SearchPage extends StatefulWidget {
   final UserModel userModel;
   final User firebaseUser;
 
-  const SearchPage(
-      {Key? key, required this.userModel, required this.firebaseUser})
-      : super(key: key);
+  const SearchPage({
+    Key? key,
+    required this.userModel,required this.firebaseUser
+  }) : super(key: key);
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -131,10 +132,11 @@ class _SearchPageState extends State<SearchPage> {
                                   context,
                                   CupertinoPageRoute(builder: (context) {
                                     return ChatRoomPage(
-                                        targetUser: searchedUser,
-                                        chatRoom: chatroomModel,
-                                        userModel: widget.userModel,
-                                        firebaseUser: widget.firebaseUser);
+                                      targetUser: searchedUser,
+                                      chatRoom: chatroomModel,
+                                      userModel: widget.userModel,
+                                      firebaseUser: widget.firebaseUser,
+                                    );
                                   }),
                                 );
                               }

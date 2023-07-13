@@ -39,7 +39,8 @@ class _CompleteProfileState extends State<CompleteProfile> {
       imageTemp = await _cropImage(imageFile: imageTemp);
       setState(() => imageFile = imageTemp);
     } on PlatformException catch (e) {
-      print('Failed to pick image: $e');
+      UIHelper.showAlertDialog(
+          context, 'Failed to pick image: $e', "Image Not Taken Properly");
     }
   }
 
