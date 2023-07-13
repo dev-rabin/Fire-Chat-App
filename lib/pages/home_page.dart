@@ -7,6 +7,7 @@ import 'package:fire_chatapp/modals/ui_helper.dart';
 import 'package:fire_chatapp/pages/chatroom_page.dart';
 import 'package:fire_chatapp/pages/login_page.dart';
 import 'package:fire_chatapp/pages/search_page.dart';
+import 'package:fire_chatapp/pages/user_profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -56,18 +57,43 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         title: Text("Fire Chat"),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: () {
-              UIHelper.showLoadingDialog(context, "Signing Out");
-              FirebaseAuth.instance.signOut();
-              Navigator.popUntil(context, (route) => route.isFirst);
-              Navigator.pushReplacement(context,
-                  CupertinoPageRoute(builder: (context) {
-                return LoginPage();
-              }));
-            },
-            icon: Icon(Icons.exit_to_app),
-          ),
+          SubmenuButton(
+              menuStyle: MenuStyle(
+                elevation: MaterialStatePropertyAll(12),
+                shadowColor: MaterialStatePropertyAll(Colors.black),
+                backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
+              ),
+              menuChildren: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(context,
+                        CupertinoPageRoute(builder: (context) {
+                      return UserProfile(userModel: widget.userModel);
+                    }));
+                  },
+                  child: Text("Profile"),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text("Settings"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    UIHelper.showLoadingDialog(context, "Signing Out");
+                    FirebaseAuth.instance.signOut();
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                    Navigator.pushReplacement(context,
+                        CupertinoPageRoute(builder: (context) {
+                      return LoginPage();
+                    }));
+                  },
+                  child: Text("Sign Out"),
+                ),
+              ],
+              child: Icon(
+                Icons.menu,
+                color: Colors.white,
+              )),
         ],
       ),
       body: SafeArea(

@@ -3,6 +3,7 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fire_chatapp/main.dart';
+import 'package:fire_chatapp/modals/firebase_helper.dart';
 import 'package:fire_chatapp/modals/message_modal.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                         Text(
                           (snapshot.data?['status'] == "Online")
                               ? snapshot.data!['status']
-                              : "Last Seen at ${widget.targetUser.lastSeen}",
+                              : "Last Seen at ${widget.targetUser.lastSeen!.hour}:${widget.targetUser.lastSeen!.minute}",
                           style: TextStyle(
                               fontWeight: FontWeight.normal, fontSize: 12),
                         )
